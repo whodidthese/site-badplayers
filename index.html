@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badplayers - Simple Offline Music Player</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
+</head>
+
+<body class="bg-gray-900 text-white overflow-x-hidden">
+
+    <!-- Dynamic Background -->
+    <div class="bg-hero"></div>
+    <!-- Canvas Layer for Particles -->
+    <canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <div id="app" class="relative z-10">
+
+        <!-- Navigation / Language Switcher -->
+        <nav class="absolute top-0 right-0 p-6 z-50 lang-switcher">
+            <div class="relative">
+                <button @click="toggleLangMenu"
+                    class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all border border-white/10"
+                    aria-label="Change Language">
+                    <!-- Language Icon (SVG) -->
+                    <svg class="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129">
+                        </path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div v-if="showLangMenu"
+                    class="absolute right-0 mt-2 w-48 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-fade-in-down origin-top-right">
+                    <ul class="py-1">
+                        <li v-for="lang in availableLangs" :key="lang.code">
+                            <button @click="setLang(lang.code)"
+                                class="w-full text-left px-4 py-3 text-sm hover:bg-white/10 transition-colors flex items-center justify-between"
+                                :class="{'text-blue-400 font-bold': currentLang === lang.code, 'text-gray-300': currentLang !== lang.code}">
+                                {{ lang.label }}
+                                <span v-if="currentLang === lang.code" class="text-xs">✓</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <header class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative">
+            <div class="space-y-8 max-w-2xl animate-fade-in">
+                <!-- App Icon -->
+                <div class="mx-auto w-32 h-32 md:w-40 md:h-40 relative group">
+                    <img :src="config.images.logo" alt="Badplayers Logo" class="w-full h-full object-contain">
+                </div>
+
+                <!-- Text Content -->
+                <div class="space-y-4">
+                    <h1
+                        class="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400">
+                        {{ t.app.title }}
+                    </h1>
+                    <p class="text-xl md:text-2xl text-gray-300 font-light max-w-lg mx-auto leading-relaxed">
+                        {{ t.hero.slogan }}
+                    </p>
+                    <p class="text-sm md:text-base text-gray-400 font-light tracking-wide uppercase">
+                        {{ t.app.subtitle }}
+                    </p>
+                </div>
+
+                <!-- CTA -->
+                <div v-if="showCTA" class="pt-8">
+                    <a :href="config.links.appStore"
+                        class="inline-flex items-center justify-center px-8 py-4 bg-white text-black rounded-full font-bold text-lg hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-white/20">
+                        <svg class="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.62 4.37-1.4 1.35.1 2.58.58 3.32 1.66-3.1 1.83-2.58 5.62.62 6.96-.64 1.77-1.52 3.56-3.39 5.01zM12.03 5.39c.27-1.72 1.4-2.93 2.65-3.09.24 2.1-2.02 4.32-2.65 3.09z" />
+                        </svg>
+                        {{ t.app.download }}
+                    </a>
+                    <div class="mt-4 text-xs text-gray-500">iOS 17.0+</div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 animate-bounce opacity-50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </header>
+
+        <!-- Main Content Area: Sticky Layout -->
+        <main class="relative max-w-7xl mx-auto px-4 md:px-8 py-24">
+            <div class="flex flex-col md:flex-row gap-12 lg:gap-24">
+
+                <!-- Sticky Phone Container -->
+                <div class="md:w-1/2 flex justify-center md:justify-end md:sticky md:top-24 h-fit z-20">
+                    <div
+                        class="relative mockup-frame w-72 md:w-80 shadow-2xl transition-all duration-700 hover:scale-105">
+                        <!-- Single Image Source -->
+                        <img :src="currentScreenshot" alt="App Interface"
+                            class="w-full h-auto block rounded-[32px]">
+                        <!-- Glare Effect -->
+                        <div
+                            class="absolute top-0 right-0 w-full h-full bg-gradient-to-tr from-white/5 to-transparent pointer-events-none rounded-[32px]">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scrolling Features List -->
+                <div class="md:w-1/2 space-y-32 md:py-12">
+                    <div v-for="(feature, index) in t.features" :key="index"
+                        class="feature-item group opacity-80 hover:opacity-100 transition-opacity duration-500">
+                        <div
+                            class="relative pl-8 border-l-2 border-white/10 group-hover:border-white/50 transition-colors duration-300">
+                            <span
+                                class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-900 border-2 border-white/20 group-hover:border-white group-hover:scale-110 transition-all"></span>
+
+                            <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                                {{ feature.title }}
+                            </h2>
+                            <p class="text-lg md:text-xl text-gray-400 leading-relaxed max-w-md">
+                                {{ feature.desc }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Extra spacing at bottom to allow full scroll past -->
+                    <div class="h-24"></div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Why Section -->
+        <section class="py-24 px-4 bg-gradient-to-t from-black via-black/80 to-transparent">
+            <div class="max-w-4xl mx-auto text-center space-y-8">
+                <h2
+                    class="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                    {{ t.why.title }}
+                </h2>
+                <p class="text-xl md:text-2xl text-gray-300 font-light leading-relaxed">
+                    {{ t.why.content }}
+                </p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 px-4 border-t border-white/10 bg-black">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-gray-500 text-sm">
+                    {{ t.footer.copyright }}
+                </div>
+
+                <div class="flex gap-6 text-sm">
+                    <a href="privacy.html" class="text-gray-400 hover:text-white transition-colors">{{ t.footer.privacy
+                        }}</a>
+                    <a :href="config.links.issues" class="text-gray-400 hover:text-white transition-colors">{{
+                        t.footer.support }}</a>
+                    <a :href="config.links.github" target="_blank"
+                        class="text-gray-400 hover:text-white transition-colors">GitHub</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
