@@ -3,7 +3,7 @@ const AppConfig = {
     links: {
         appStore: "#",
         github: "#",
-        issues: "#"
+        issues: "https://github.com/whodidthese/site-badplayers/issues"
     },
     images: {
         // logo: "https://placehold.co/512x512/000000/FFFFFF/png?text=Badplayers",
