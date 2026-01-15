@@ -29,6 +29,11 @@ const app = createApp({
             const link = config.links.appStore;
             return link && link !== '' && link !== '#';
         });
+
+        const showGitHub = computed(() => {
+            const link = config.links.github;
+            return link && link !== '' && link !== '#';
+        });
         
         // Available languages list - scalable for future
         const availableLangs = [
@@ -167,7 +172,8 @@ const app = createApp({
             availableLangs,
             toggleLangMenu,
             setLang,
-            showCTA
+            showCTA,
+            showGitHub
         };
     }
 });

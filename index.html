@@ -177,7 +177,7 @@
                         }}</a>
                     <a :href="config.links.issues" class="text-gray-400 hover:text-white transition-colors">{{
                         t.footer.support }}</a>
-                    <a :href="config.links.github" target="_blank"
+                    <a v-if="showGitHub" :href="config.links.github" target="_blank"
                         class="text-gray-400 hover:text-white transition-colors">GitHub</a>
                 </div>
             </div>
