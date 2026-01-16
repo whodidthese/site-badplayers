@@ -1,7 +1,7 @@
 const AppConfig = {
     // 待更新
     links: {
-        appStore: "#",
+        appStore: "https://apps.apple.com/us/app/badplayers/id6757827775",
         github: "#",
         issues: "https://github.com/whodidthese/site-badplayers/issues"
     },
