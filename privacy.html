@@ -74,7 +74,8 @@
 
                 <h2>3. Contact Us</h2>
                 <p>If you have any questions regarding this Privacy Policy, please contact us via <a
-                        href="https://github.com/ken-ngwa/apple-badplayers/issues"
+                        id="issues-link"
+                        href="#"
                         class="text-blue-400 hover:text-blue-300 underline">GitHub Issues</a>.</p>
             </section>
 
@@ -85,6 +86,16 @@
         </footer>
 
     </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const link = document.getElementById('issues-link');
+            if (link && typeof AppConfig !== 'undefined' && AppConfig.links.issues) {
+                link.href = AppConfig.links.issues;
+            }
+        });
+    </script>
 
 </body>
 
