@@ -1,181 +1,129 @@
-const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+(function () {
+    "use strict";
 
-const app = createApp({
-    setup() {
-        // State
-        const currentLang = ref('en');
-        const showLangMenu = ref(false); // Dropdown state
-        const config = AppConfig;
-        
-        // Computed: Get current language content
-        const t = computed(() => {
-            return config.i18n[currentLang.value] || config.i18n['en'];
-        });
+    const supportedLanguages = ["en", "zh", "ja", "ko"];
+    const languageLabels = { en: "EN", zh: "繁", ja: "日", ko: "한" };
+    const metaDescription = document.querySelector('meta[name="description"]');
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+    const picker = document.querySelector(".language-picker");
+    const pickerButton = document.querySelector(".language-button");
+    const menu = document.querySelector(".language-menu");
+    const currentLabel = document.querySelector(".language-current");
 
-        const isZh = computed(() => currentLang.value === 'zh');
-        
-        // Computed: Get current language screenshot
-        const currentScreenshot = computed(() => {
-            const screenshotMap = {
-                'en': config.images.screenshotEn,
-                'zh': config.images.screenshotZh,
-                'ja': config.images.screenshotJa,
-                'ko': config.images.screenshotKo
-            };
-            return screenshotMap[currentLang.value] || config.images.screenshotEn;
-        });
-        
-        const showCTA = computed(() => {
-            const link = config.links.appStore;
-            return link && link !== '' && link !== '#';
-        });
-
-        const showGitHub = computed(() => {
-            const link = config.links.github;
-            return link && link !== '' && link !== '#';
-        });
-        
-        // Available languages list - scalable for future
-        const availableLangs = [
-            { code: 'en', label: 'English' },
-            { code: 'zh', label: '繁體中文' },
-            { code: 'ja', label: '日本語' },
-            { code: 'ko', label: '한국어' }
-        ];
-
-        // Methods
-        const toggleLangMenu = () => {
-            showLangMenu.value = !showLangMenu.value;
-        };
-
-        const setLang = (lang) => {
-            // Check if lang exists in config to prevent errors, fallback to English if missing
-            if (config.i18n[lang]) { 
-                currentLang.value = lang;
-            } else {
-                // If language is supported in UI but not in config (e.g. ja/ko), 
-                // we still set it but the 't' computed property will fallback to 'en'
-                // This allows the UI to show the selection even if translation is missing
-                currentLang.value = lang; 
-            }
-            showLangMenu.value = false;
-        };
-        
-        // Close menu when clicking outside
-        const closeMenu = (e) => {
-             if (!e.target.closest('.lang-switcher')) {
-                showLangMenu.value = false;
-             }
-        };
-
-        // Canvas Animation Logic
-        const initCanvas = () => {
-            const canvas = document.getElementById('bg-canvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let particles = [];
-            
-            const resize = () => {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
-            };
-            
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * width;
-                    this.y = Math.random() * height;
-                    this.vx = (Math.random() - 0.5) * 0.5;
-                    this.vy = (Math.random() - 0.5) * 0.5;
-                    this.size = Math.random() * 2 + 0.5;
-                    this.alpha = Math.random() * 0.5 + 0.1;
-                }
-                
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    
-                    if (this.x < 0) this.x = width;
-                    if (this.x > width) this.x = 0;
-                    if (this.y < 0) this.y = height;
-                    if (this.y > height) this.y = 0;
-                }
-                
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-                    ctx.fill();
-                }
-            }
-            
-            const initParticles = () => {
-                particles = [];
-                const count = Math.min(width * 0.05, 100); // Responsive count
-                for (let i = 0; i < count; i++) {
-                    particles.push(new Particle());
-                }
-            };
-            
-            const animate = () => {
-                ctx.clearRect(0, 0, width, height);
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
-                requestAnimationFrame(animate);
-            };
-            
-            window.addEventListener('resize', () => {
-                resize();
-                initParticles();
-            });
-            
-            resize();
-            initParticles();
-            animate();
-        };
-
-        // Lifecycle
-        onMounted(() => {
-            // 1. Set background image from config
-            const bgElement = document.querySelector('.bg-hero');
-            if (bgElement && config.images.background) {
-                bgElement.style.backgroundImage = `url('${config.images.background}')`;
-            }
-
-            // 2. Detect browser language
-            const browserLang = navigator.language || navigator.userLanguage; 
-            if (browserLang.toLowerCase().includes('zh')) {
-                currentLang.value = 'zh';
-            }
-            
-            // 3. Init click outside listener
-            document.addEventListener('click', closeMenu);
-            
-            // 4. Init Canvas
-            initCanvas();
-        });
-        
-        onUnmounted(() => {
-            document.removeEventListener('click', closeMenu);
-        });
-
-        return {
-            currentLang,
-            config,
-            t,
-            isZh,
-            currentScreenshot,
-            showLangMenu,
-            availableLangs,
-            toggleLangMenu,
-            setLang,
-            showCTA,
-            showGitHub
-        };
+    function getTranslation(dictionary, path) {
+        return path.split(".").reduce(function (value, key) {
+            return value && value[key] !== undefined ? value[key] : undefined;
+        }, dictionary);
     }
-});
 
-app.mount('#app');
+    function normalizeLanguage(value) {
+        const language = String(value || "").toLowerCase();
+        if (language.startsWith("zh")) return "zh";
+        if (language.startsWith("ja")) return "ja";
+        if (language.startsWith("ko")) return "ko";
+        return "en";
+    }
+
+    function setMetaContent(element, content) {
+        if (element && content) element.setAttribute("content", content);
+    }
+
+    function applyLanguage(language, persist) {
+        const nextLanguage = supportedLanguages.includes(language) ? language : "en";
+        const dictionary = AppConfig.locales[nextLanguage] || AppConfig.locales.en;
+
+        const isPrivacyPage = document.body.dataset.page === "privacy";
+        const pageTitle = isPrivacyPage ? dictionary.policy.title + " — Badplayers" : dictionary.meta.title;
+        const pageDescription = isPrivacyPage ? dictionary.policy.intro : dictionary.meta.description;
+
+        document.documentElement.lang = nextLanguage === "zh" ? "zh-Hant" : nextLanguage;
+        document.title = pageTitle;
+        setMetaContent(metaDescription, pageDescription);
+        setMetaContent(ogTitle, pageTitle);
+        setMetaContent(ogDescription, pageDescription);
+        setMetaContent(twitterTitle, pageTitle);
+        setMetaContent(twitterDescription, pageDescription);
+
+        document.querySelectorAll("[data-i18n]").forEach(function (element) {
+            const translation = getTranslation(dictionary, element.dataset.i18n);
+            if (typeof translation === "string") element.textContent = translation;
+        });
+
+        document.querySelectorAll("[data-i18n-alt]").forEach(function (element) {
+            const translation = getTranslation(dictionary, element.dataset.i18nAlt);
+            if (typeof translation === "string") element.setAttribute("alt", translation);
+        });
+
+        document.querySelectorAll("[data-i18n-aria]").forEach(function (element) {
+            const translation = getTranslation(dictionary, element.dataset.i18nAria);
+            if (typeof translation === "string") element.setAttribute("aria-label", translation);
+        });
+
+        if (currentLabel) currentLabel.textContent = languageLabels[nextLanguage];
+        document.querySelectorAll("[data-lang]").forEach(function (button) {
+            button.setAttribute("aria-checked", String(button.dataset.lang === nextLanguage));
+        });
+
+        if (persist) {
+            try {
+                localStorage.setItem("badplayers-language", nextLanguage);
+            } catch (error) {
+                // Language persistence is optional when browser storage is unavailable.
+            }
+        }
+    }
+
+    function closeMenu() {
+        if (!menu || !pickerButton) return;
+        menu.hidden = true;
+        pickerButton.setAttribute("aria-expanded", "false");
+    }
+
+    function openMenu() {
+        if (!menu || !pickerButton) return;
+        menu.hidden = false;
+        pickerButton.setAttribute("aria-expanded", "true");
+        const selected = menu.querySelector('[aria-checked="true"]');
+        if (selected) selected.focus();
+    }
+
+    let storedLanguage = null;
+    try {
+        storedLanguage = localStorage.getItem("badplayers-language");
+    } catch (error) {
+        storedLanguage = null;
+    }
+
+    applyLanguage(storedLanguage || normalizeLanguage(navigator.language), false);
+
+    if (pickerButton && menu) {
+        pickerButton.addEventListener("click", function () {
+            if (menu.hidden) openMenu(); else closeMenu();
+        });
+
+        menu.addEventListener("click", function (event) {
+            const option = event.target.closest("[data-lang]");
+            if (!option) return;
+            applyLanguage(option.dataset.lang, true);
+            closeMenu();
+            pickerButton.focus();
+        });
+
+        document.addEventListener("click", function (event) {
+            if (picker && !picker.contains(event.target)) closeMenu();
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeMenu();
+                pickerButton.focus();
+            }
+        });
+    }
+
+    const year = document.getElementById("current-year");
+    if (year) year.textContent = String(new Date().getFullYear());
+})();
