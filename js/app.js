@@ -124,6 +124,100 @@
         });
     }
 
+    const carousel = document.querySelector("[data-carousel]");
+
+    if (carousel) {
+        const slides = Array.from(carousel.querySelectorAll("[data-slide]"));
+        const dots = Array.from(carousel.querySelectorAll("[data-slide-to]"));
+        const previousButton = carousel.querySelector("[data-carousel-prev]");
+        const nextButton = carousel.querySelector("[data-carousel-next]");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let currentSlide = 0;
+        let rotationTimer = null;
+        let carouselIsVisible = false;
+        let pointerStartX = null;
+
+        function renderSlide(nextIndex, userInitiated) {
+            currentSlide = (nextIndex + slides.length) % slides.length;
+
+            slides.forEach(function (slide, index) {
+                const isActive = index === currentSlide;
+                slide.classList.toggle("is-active", isActive);
+                slide.classList.toggle("is-before", index < currentSlide);
+                slide.classList.toggle("is-after", index > currentSlide);
+                slide.setAttribute("aria-hidden", String(!isActive));
+            });
+
+            dots.forEach(function (dot, index) {
+                const isActive = index === currentSlide;
+                dot.classList.toggle("is-active", isActive);
+                dot.setAttribute("aria-selected", String(isActive));
+                dot.tabIndex = isActive ? 0 : -1;
+            });
+
+            if (userInitiated) scheduleRotation(8500);
+        }
+
+        function stopRotation() {
+            window.clearTimeout(rotationTimer);
+            rotationTimer = null;
+        }
+
+        function scheduleRotation(delay) {
+            stopRotation();
+            if (reducedMotion.matches || !carouselIsVisible || document.hidden || carousel.matches(":hover") || carousel.contains(document.activeElement)) return;
+            rotationTimer = window.setTimeout(function () {
+                renderSlide(currentSlide + 1, false);
+                scheduleRotation(6200);
+            }, delay || 6200);
+        }
+
+        if (previousButton) previousButton.addEventListener("click", function () { renderSlide(currentSlide - 1, true); });
+        if (nextButton) nextButton.addEventListener("click", function () { renderSlide(currentSlide + 1, true); });
+
+        dots.forEach(function (dot) {
+            dot.addEventListener("click", function () { renderSlide(Number(dot.dataset.slideTo), true); });
+        });
+
+        carousel.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                renderSlide(currentSlide - 1, true);
+            }
+            if (event.key === "ArrowRight") {
+                event.preventDefault();
+                renderSlide(currentSlide + 1, true);
+            }
+        });
+
+        carousel.addEventListener("pointerdown", function (event) {
+            if (event.pointerType !== "mouse") pointerStartX = event.clientX;
+        });
+
+        carousel.addEventListener("pointerup", function (event) {
+            if (pointerStartX === null) return;
+            const distance = event.clientX - pointerStartX;
+            pointerStartX = null;
+            if (Math.abs(distance) < 48) return;
+            renderSlide(currentSlide + (distance < 0 ? 1 : -1), true);
+        });
+
+        carousel.addEventListener("mouseenter", stopRotation);
+        carousel.addEventListener("mouseleave", function () { scheduleRotation(3000); });
+        carousel.addEventListener("focusin", stopRotation);
+        carousel.addEventListener("focusout", function () { scheduleRotation(3000); });
+        document.addEventListener("visibilitychange", function () { scheduleRotation(3000); });
+        reducedMotion.addEventListener("change", function () { scheduleRotation(3000); });
+
+        const carouselObserver = new IntersectionObserver(function (entries) {
+            carouselIsVisible = entries[0].isIntersecting;
+            scheduleRotation(2400);
+        }, { threshold: 0.35 });
+
+        carouselObserver.observe(carousel);
+        renderSlide(0, false);
+    }
+
     const year = document.getElementById("current-year");
     if (year) year.textContent = String(new Date().getFullYear());
 })();

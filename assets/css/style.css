@@ -117,8 +117,8 @@ img { display: block; max-width: 100%; height: auto; }
 .brand, .footer-brand { display: flex; align-items: center; gap: 12px; }
 
 .brand img, .footer-brand img {
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.38);
+    clip-path: circle(36% at 50% 50%);
+    transform: scale(1.28);
 }
 
 .brand span, .footer-brand strong {
@@ -267,24 +267,23 @@ h1 {
 .button-secondary:hover, .button-secondary:focus-visible { border-color: var(--line-strong); background: rgba(255, 255, 255, 0.09); }
 .availability { margin: 16px 0 0; color: var(--faint); font-size: 0.85rem; }
 
-.hero-visual { position: relative; min-height: 570px; }
-.icon-stage { position: absolute; top: 7px; left: 0; width: 58%; z-index: 2; }
+.hero-visual { position: relative; min-height: 610px; }
 
-.icon-halo {
+.hero-visual::before {
+    content: "";
     position: absolute;
-    inset: -18%;
+    inset: 8% -14% -5% 6%;
+    border: 1px solid rgba(255, 255, 255, 0.055);
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(236, 184, 104, 0.2), transparent 68%);
-    filter: blur(10px);
+    background: radial-gradient(circle at 46% 48%, rgba(224, 160, 70, 0.17), transparent 56%);
+    transform: rotate(-8deg);
 }
-
-.app-icon { position: relative; z-index: 1; border-radius: 23%; box-shadow: 0 34px 70px rgba(0, 0, 0, 0.55); }
 
 .phone-preview {
     position: absolute;
     right: 0;
     bottom: 0;
-    width: 57%;
+    width: 66%;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 38px;
@@ -339,25 +338,141 @@ h1 {
     font-size: 1.08rem;
 }
 
-.shot-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.shot-carousel { position: relative; }
 
-.shot-card {
-    margin: 0;
-    padding: 13px;
+.shot-viewport {
+    position: relative;
+    min-height: clamp(520px, 57vw, 680px);
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.067), rgba(255, 255, 255, 0.025));
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(circle at 50% 42%, rgba(214, 154, 69, 0.115), transparent 29rem),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
+    box-shadow: 0 34px 90px rgba(0, 0, 0, 0.28);
 }
 
-.shot-card img { width: 100%; border-radius: 15px; background: #000; }
-.shot-card figcaption { padding: 16px 6px 5px; display: flex; flex-direction: column; }
-.shot-card figcaption strong { font-size: 0.98rem; }
-.shot-card figcaption span { margin-top: 2px; color: var(--faint); font-size: 0.82rem; }
-.shot-wide { grid-column: span 12; }
-.shot-phone { grid-column: span 4; }
-.shot-tablet { grid-column: span 6; }
-.shot-last { align-self: stretch; }
+.shot-viewport::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+    pointer-events: none;
+}
+
+.shot-card {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: clamp(20px, 3.2vw, 42px);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate3d(5%, 0, 0) scale(0.985);
+    transition: opacity 520ms ease, filter 650ms ease, transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+}
+
+.shot-card.is-before { transform: translate3d(-5%, 0, 0) scale(0.985); }
+
+.shot-card.is-active {
+    z-index: 2;
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+    pointer-events: auto;
+}
+
+.shot-media {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shot-card img {
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: #000;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+}
+
+.shot-card figcaption {
+    width: min(760px, 100%);
+    margin: 22px auto 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+}
+
+.shot-card figcaption strong { font-size: 1rem; }
+.shot-card figcaption span { color: var(--faint); font-size: 0.86rem; }
+
+.shot-toolbar {
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.shot-dots { display: flex; align-items: center; gap: 8px; }
+
+.shot-dot {
+    position: relative;
+    width: 42px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--faint);
+    cursor: pointer;
+    font-size: 0.67rem;
+    font-weight: 760;
+    letter-spacing: 0.08em;
+    transition: color 220ms ease;
+}
+
+.shot-dot::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    bottom: 1px;
+    left: 5px;
+    height: 1px;
+    background: var(--line-strong);
+    transform-origin: left;
+    transition: background 220ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shot-dot:hover, .shot-dot:focus-visible, .shot-dot.is-active { color: var(--text); }
+.shot-dot.is-active::after { background: var(--amber-soft); transform: scaleY(3); }
+
+.shot-arrows { display: flex; gap: 9px; }
+
+.shot-arrows button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface-soft);
+    cursor: pointer;
+    transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.shot-arrows button:hover, .shot-arrows button:focus-visible { border-color: var(--line-strong); background: rgba(255, 255, 255, 0.09); transform: translateY(-2px); }
+.shot-arrows svg { width: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .features { border-top: 1px solid var(--line); }
 .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
 
@@ -466,7 +581,7 @@ h1 {
     .nav-links { display: none; }
     .hero { grid-template-columns: 1fr; gap: 30px; padding-top: 70px; }
     .hero-copy { max-width: 780px; }
-    .hero-visual { width: min(620px, 100%); min-height: 620px; margin-inline: auto; }
+    .hero-visual { width: min(560px, 100%); min-height: 650px; margin-inline: auto; }
     .trust-bar, .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .trust-bar div:nth-child(3) { padding-left: 0; border-left: 0; }
     .trust-bar div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
@@ -484,16 +599,20 @@ h1 {
     h1 { font-size: clamp(3rem, 15vw, 4.8rem); }
     .hero-actions { flex-direction: column; }
     .button { width: 100%; }
-    .hero-visual { min-height: 450px; margin-top: 24px; }
-    .icon-stage { width: 55%; }
-    .phone-preview { width: 56%; border-radius: 27px; }
+    .hero-visual { min-height: 560px; margin-top: 24px; }
+    .phone-preview { right: 8%; width: 68%; border-radius: 27px; }
     .trust-bar, .feature-grid, .policy-grid { grid-template-columns: 1fr; }
     .trust-bar div { padding: 20px 0; border-left: 0; border-bottom: 1px solid var(--line); }
     .trust-bar div:last-child { border-bottom: 0; }
     .showcase, .features, .use-cases { padding: 92px 0; }
-    .shot-grid { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 1px 18px; scrollbar-width: thin; }
-    .shot-card { flex: 0 0 88%; scroll-snap-align: start; }
-    .shot-phone { flex-basis: 72%; }
+    .shot-viewport { min-height: 520px; border-radius: 28px; }
+    .shot-card { padding: 20px 16px 22px; }
+    .shot-card figcaption { margin-top: 16px; display: block; }
+    .shot-card figcaption span { margin-top: 3px; display: block; }
+    .shot-toolbar { align-items: flex-end; gap: 14px; }
+    .shot-dots { width: 100%; gap: 2px; }
+    .shot-dot { width: auto; min-width: 0; flex: 1; }
+    .shot-arrows button { width: 42px; height: 42px; }
     .feature-grid article { min-height: 230px; }
     .privacy-callout { margin-bottom: 90px; padding: 34px 25px; border-radius: 26px; }
     .text-link { min-width: 0; width: 100%; }

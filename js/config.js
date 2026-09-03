@@ -5,7 +5,7 @@ const AppConfig = {
                 title: "Badplayers — Private Offline Audio Player",
                 description: "Badplayers is a private offline audio player for iPhone and iPad. Import your own audio, organize playlists, and keep listening without accounts, ads, or data collection."
             },
-            accessibility: { skip: "Skip to content", mainNav: "Main navigation", principles: "Product principles" },
+            accessibility: { skip: "Skip to content", mainNav: "Main navigation", principles: "Product principles", chooseScreenshot: "Choose a screenshot", previousScreenshot: "Previous screenshot", nextScreenshot: "Next screenshot" },
             nav: { features: "Features", screenshots: "Screenshots", privacy: "Privacy", download: "App Store", language: "Change language" },
             hero: {
                 eyebrow: "Private · Offline · Yours",
@@ -77,7 +77,7 @@ const AppConfig = {
                 title: "Badplayers — 私密的離線音訊播放器",
                 description: "Badplayers 是 iPhone 與 iPad 的私密離線音訊播放器。匯入自己的音訊、整理播放列表，不需帳號、沒有廣告，也不收集資料。"
             },
-            accessibility: { skip: "跳到主要內容", mainNav: "主要導覽", principles: "產品原則" },
+            accessibility: { skip: "跳到主要內容", mainNav: "主要導覽", principles: "產品原則", chooseScreenshot: "選擇畫面", previousScreenshot: "上一張畫面", nextScreenshot: "下一張畫面" },
             nav: { features: "功能", screenshots: "畫面", privacy: "隱私", download: "App Store", language: "切換語言" },
             hero: {
                 eyebrow: "私密 · 離線 · 屬於你",
@@ -149,7 +149,7 @@ const AppConfig = {
                 title: "Badplayers — プライベートなオフライン音声プレーヤー",
                 description: "Badplayers は iPhone と iPad 向けのプライベートなオフライン音声プレーヤーです。自分の音声を取り込み、プレイリストを整理。アカウント、広告、データ収集はありません。"
             },
-            accessibility: { skip: "メインコンテンツへ移動", mainNav: "メインナビゲーション", principles: "製品の方針" },
+            accessibility: { skip: "メインコンテンツへ移動", mainNav: "メインナビゲーション", principles: "製品の方針", chooseScreenshot: "画面を選択", previousScreenshot: "前の画面", nextScreenshot: "次の画面" },
             nav: { features: "機能", screenshots: "画面", privacy: "プライバシー", download: "App Store", language: "言語を変更" },
             hero: {
                 eyebrow: "プライベート · オフライン · あなたのもの",
@@ -216,7 +216,7 @@ const AppConfig = {
                 title: "Badplayers — 개인적인 오프라인 오디오 플레이어",
                 description: "Badplayers는 iPhone과 iPad용 개인 오프라인 오디오 플레이어입니다. 내 오디오를 가져오고 재생목록을 정리하세요. 계정, 광고, 데이터 수집이 없습니다."
             },
-            accessibility: { skip: "본문으로 이동", mainNav: "주요 탐색", principles: "제품 원칙" },
+            accessibility: { skip: "본문으로 이동", mainNav: "주요 탐색", principles: "제품 원칙", chooseScreenshot: "화면 선택", previousScreenshot: "이전 화면", nextScreenshot: "다음 화면" },
             nav: { features: "기능", screenshots: "화면", privacy: "개인정보", download: "App Store", language: "언어 변경" },
             hero: {
                 eyebrow: "개인적 · 오프라인 · 나만의 것",
